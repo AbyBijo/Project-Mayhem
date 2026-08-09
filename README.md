@@ -23,7 +23,7 @@ Project Mayhem is a focused Android document editor that turns structured Markdo
 The app uses Android's **Storage Access Framework (SAF)**. On first launch, the user chooses an output folder and grants access to it. Project Mayhem remembers that permission and saves subsequent PDFs directly into the same folder. The destination can be changed at any time.
 
 <p align="center">
-  <img src="docs/images/overview.jpg" alt="Project Mayhem main screen and document preview" width="520">
+  <img src="overview.jpg" alt="Project Mayhem main screen and document preview" width="520">
 </p>
 <p align="center"><em>Figure 1 — Main screen with the four editing panels and live document preview.</em></p>
 
@@ -114,7 +114,7 @@ The editor is divided into four collapsible panels. Tap a panel header to open i
 ### 01 // Structure & Title
 
 <p align="center">
-  <img src="docs/images/structure-and-title.jpg" alt="Structure and Title panel" width="520">
+  <img src="structure-and-title.jpg" alt="Structure and Title panel" width="520">
 </p>
 <p align="center"><em>Figure 2 — Structure, title typography, metadata, layout, and footer controls.</em></p>
 
@@ -138,7 +138,7 @@ The editor is divided into four collapsible panels. Tap a panel header to open i
 ### 02 // Content (Markdown)
 
 <p align="center">
-  <img src="docs/images/content-markdown.jpg" alt="Markdown content editor and live preview" width="520">
+  <img src="content-markdown.jpg" alt="Markdown content editor and live preview" width="520">
 </p>
 <p align="center"><em>Figure 3 — Markdown toolbar, source editor, and rendered Markdown preview.</em></p>
 
@@ -183,7 +183,7 @@ For predictable pagination, divide long documents into short paragraphs and head
 ### 03 // Visuals
 
 <p align="center">
-  <img src="docs/images/visuals.jpg" alt="Visuals panel" width="620">
+  <img src="visuals.jpg" alt="Visuals panel" width="620">
 </p>
 <p align="center"><em>Figure 4 — Image upload, caption, placement, and watermark settings.</em></p>
 
@@ -200,7 +200,7 @@ Use a clear JPG, PNG, or other image format supported by Android WebView. High-r
 ### 04 // Security & Export
 
 <p align="center">
-  <img src="docs/images/security-and-export.jpg" alt="Security and Export panel" width="620">
+  <img src="security-and-export.jpg" alt="Security and Export panel" width="620">
 </p>
 <p align="center"><em>Figure 5 — Output folder status, encryption, output polarity, and save action.</em></p>
 
