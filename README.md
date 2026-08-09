@@ -13,6 +13,7 @@
 ![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square&logo=android&logoColor=white)
 ![Offline](https://img.shields.io/badge/PDF_ENGINE-OFFLINE-111111?style=flat-square)
 ![Storage](https://img.shields.io/badge/STORAGE-SAF-555555?style=flat-square)
+[![License: MIT](https://img.shields.io/badge/License-MIT-8b0000?style=flat-square)](LICENSE)
 
 [**Download**](https://github.com/AbyBijo/Project-Mayhem/releases/latest) · [**User guide**](docs/Project-Mayhem-User-Guide.pdf) · [**Report an issue**](https://github.com/AbyBijo/Project-Mayhem/issues/new/choose) · [**Contribute**](CONTRIBUTING.md)
 
@@ -420,6 +421,12 @@ What was expected:
 Steps to reproduce:
 Screenshot or error message:
 ```
+
+---
+
+## License
+
+Project Mayhem is released under the [MIT License](LICENSE).
 
 ---
 

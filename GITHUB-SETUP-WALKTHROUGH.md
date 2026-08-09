@@ -22,7 +22,7 @@ This checklist turns `Project-Mayhem` into a polished public repository at:
    > Offline-first Android Markdown editor for creating stylized, borderless A4 PDFs with live preview, images, watermarks, password protection, negative mode, and one-time folder setup—no internet or broad storage permission.
 
 6. Choose **Public** if you want people to discover and download it.
-7. Do **not** initialise it with a README, `.gitignore`, or license—the project already contains a README and `.gitignore`.
+7. Do **not** initialise it with a README, `.gitignore`, or license—the project already contains all three.
 8. Click **Create repository**.
 
 ### Recommended About settings
@@ -170,16 +170,11 @@ The workflow intentionally builds a debug APK and does not need the private rele
 
 ---
 
-## 6. Decide the license before calling it open source
+## 6. Verify the MIT license
 
-A public GitHub repository is visible, but it is not automatically open source. Choose deliberately:
+Project Mayhem uses the **MIT License**, a simple permissive open-source license. The repository already includes `LICENSE`, and the README links to it.
 
-- **MIT License:** simple and permissive.
-- **Apache License 2.0:** permissive with an explicit patent grant.
-- **GPLv3:** derivative distributions must remain under GPLv3.
-- **No license:** others may view the code but do not receive permission to reuse it.
-
-On GitHub, use **Add file → Create new file**, name it `LICENSE`, and select **Choose a license template**. Do not add a license badge to the README until a license has actually been committed.
+After the pull request is merged, verify that GitHub identifies the repository license as MIT in the About panel. Retain the copyright and permission notice when redistributing substantial portions of the source.
 
 ---
 
