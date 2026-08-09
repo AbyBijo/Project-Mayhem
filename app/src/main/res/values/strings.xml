@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Project Mayhem</string>
+    <string name="image_picker_unavailable">No compatible image picker is available.</string>
+    <string name="folder_required">Choose an output folder to save this PDF.</string>
+    <string name="folder_permission_failed">The selected folder did not grant write access.</string>
+    <string name="no_folder_selected">No output folder selected</string>
+    <string name="selected_folder">Selected output folder</string>
+    <string name="invalid_pdf">The generated data is not a valid PDF.</string>
+    <string name="create_failed">The document provider could not create the PDF.</string>
+    <string name="open_failed">The new PDF could not be opened for writing.</string>
+    <string name="saved_to">Saved to %1$s/%2$s</string>
+    <string name="folder_access_lost">Folder access was lost. Choose the output folder again.</string>
+    <string name="save_failed">Could not save PDF: %1$s</string>
+    <string name="empty_pdf">No PDF data was generated.</string>
+    <string name="pdf_too_large">The PDF is too large to save safely.</string>
+</resources>

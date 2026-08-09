@@ -1,16 +1,20 @@
+<p align="center">
+  <img src="docs/images/project-mayhem-social-preview.png" alt="Project Mayhem — offline Android PDF editor" width="100%">
+</p>
+
 <div align="center">
-  <img src="project-mayhem-icon.png" alt="Project Mayhem icon" width="180">
 
 # PROJECT MAYHEM
 
 **An offline-first Android editor for designing and saving borderless A4 PDFs.**
 
-![Version](https://img.shields.io/badge/version-1-8b0000?style=for-the-badge)
-![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)
-![Offline](https://img.shields.io/badge/PDF_ENGINE-OFFLINE-111111?style=for-the-badge)
-![Storage](https://img.shields.io/badge/STORAGE-SAF-555555?style=for-the-badge)
+[![Android CI](https://github.com/AbyBijo/Project-Mayhem/actions/workflows/android-ci.yml/badge.svg)](https://github.com/AbyBijo/Project-Mayhem/actions/workflows/android-ci.yml)
+![Version](https://img.shields.io/badge/version-1-8b0000?style=flat-square)
+![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square&logo=android&logoColor=white)
+![Offline](https://img.shields.io/badge/PDF_ENGINE-OFFLINE-111111?style=flat-square)
+![Storage](https://img.shields.io/badge/STORAGE-SAF-555555?style=flat-square)
 
-[User guide (PDF)](Project-Mayhem-User-Guide.pdf) · [Report an issue](https://github.com/AbyBijo)
+[**Download**](https://github.com/AbyBijo/Project-Mayhem/releases/latest) · [**User guide**](docs/Project-Mayhem-User-Guide.pdf) · [**Report an issue**](https://github.com/AbyBijo/Project-Mayhem/issues/new/choose) · [**Contribute**](CONTRIBUTING.md)
 
 </div>
 
@@ -23,7 +27,7 @@ Project Mayhem is a focused Android document editor that turns structured Markdo
 The app uses Android's **Storage Access Framework (SAF)**. On first launch, the user chooses an output folder and grants access to it. Project Mayhem remembers that permission and saves subsequent PDFs directly into the same folder. The destination can be changed at any time.
 
 <p align="center">
-  <img src="overview.jpg" alt="Project Mayhem main screen and document preview" width="520">
+  <img src="docs/images/overview.jpg" alt="Project Mayhem main screen and document preview" width="520">
 </p>
 <p align="center"><em>Figure 1 — Main screen with the four editing panels and live document preview.</em></p>
 
@@ -58,7 +62,7 @@ The app uses Android's **Storage Access Framework (SAF)**. On first launch, the 
 
 ## Installing the APK
 
-1. Open the repository's **Releases** page.
+1. Open the repository's [**Releases** page](https://github.com/AbyBijo/Project-Mayhem/releases).
 2. Download `Project-Mayhem.apk` from the latest Version 1 release.
 3. Open the downloaded APK.
 4. If Android requests permission to install unknown apps, allow it only for the app you used to open the APK, such as your browser or file manager.
@@ -114,7 +118,7 @@ The editor is divided into four collapsible panels. Tap a panel header to open i
 ### 01 // Structure & Title
 
 <p align="center">
-  <img src="structure-and-title.jpg" alt="Structure and Title panel" width="520">
+  <img src="docs/images/structure-and-title.jpg" alt="Structure and Title panel" width="520">
 </p>
 <p align="center"><em>Figure 2 — Structure, title typography, metadata, layout, and footer controls.</em></p>
 
@@ -138,7 +142,7 @@ The editor is divided into four collapsible panels. Tap a panel header to open i
 ### 02 // Content (Markdown)
 
 <p align="center">
-  <img src="content-markdown.jpg" alt="Markdown content editor and live preview" width="520">
+  <img src="docs/images/content-markdown.jpg" alt="Markdown content editor and live preview" width="520">
 </p>
 <p align="center"><em>Figure 3 — Markdown toolbar, source editor, and rendered Markdown preview.</em></p>
 
@@ -183,7 +187,7 @@ For predictable pagination, divide long documents into short paragraphs and head
 ### 03 // Visuals
 
 <p align="center">
-  <img src="visuals.jpg" alt="Visuals panel" width="620">
+  <img src="docs/images/visuals.jpg" alt="Visuals panel" width="620">
 </p>
 <p align="center"><em>Figure 4 — Image upload, caption, placement, and watermark settings.</em></p>
 
@@ -200,7 +204,7 @@ Use a clear JPG, PNG, or other image format supported by Android WebView. High-r
 ### 04 // Security & Export
 
 <p align="center">
-  <img src="security-and-export.jpg" alt="Security and Export panel" width="620">
+  <img src="docs/images/security-and-export.jpg" alt="Security and Export panel" width="620">
 </p>
 <p align="center"><em>Figure 5 — Output folder status, encryption, output polarity, and save action.</em></p>
 
@@ -289,6 +293,9 @@ Project Mayhem does not store or recover encryption passwords. Generate another 
 
 ## Building from Source
 
+> [!TIP]
+> Repository maintainers can follow the complete [GitHub launch walkthrough](GITHUB-SETUP-WALKTHROUGH.md) for About settings, topics, social preview, CI, branch protection, and publishing the Version 1 release.
+
 ### Prerequisites
 
 - JDK 17
@@ -299,7 +306,7 @@ Project Mayhem does not store or recover encryption passwords. Generate another 
 ### Clone and build
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/AbyBijo/Project-Mayhem.git
 cd Project-Mayhem
 ./gradlew assembleDebug
 ```

@@ -1,0 +1,95 @@
+name: Bug report
+description: Report a reproducible problem in Project Mayhem.
+title: "[Bug]: "
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Project Mayhem. Remove passwords and confidential document content before posting.
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: Manufacturer and model.
+      placeholder: Example — Samsung Galaxy A54
+    validations:
+      required: true
+
+  - type: input
+    id: android
+    attributes:
+      label: Android version
+      placeholder: Example — Android 15
+    validations:
+      required: true
+
+  - type: input
+    id: release
+    attributes:
+      label: Project Mayhem release
+      placeholder: Version 1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Installation or startup
+        - Structure and title
+        - Markdown editor
+        - Image or watermark
+        - Output folder
+        - PDF rendering or saving
+        - Encryption
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest reliable sequence of actions.
+      placeholder: |
+        1. Open...
+        2. Enter...
+        3. Tap...
+        4. Observe...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or error messages
+      description: Drag files here. Redact private content first.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: I removed passwords and confidential document content.
+          required: true
+        - label: I can reproduce this problem on the release listed above.
+          required: true
