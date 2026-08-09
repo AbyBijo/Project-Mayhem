@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: content:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: content:; font-src 'self' data:; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+    <title>Project Mayhem</title>
+
+    <!-- All runtime dependencies are bundled so PDF creation works fully offline. -->
+    <script src="vendor/html2canvas.min.js"></script>
+    <script src="vendor/jspdf.umd.min.js"></script>
+    <script src="vendor/marked.min.js"></script>
+    <script src="vendor/purify.min.js"></script>
+    
+    <style>
+        @font-face { font-family: 'Anton'; src: url('fonts/Anton-Regular.ttf') format('truetype'); font-style: normal; font-weight: 400 900; font-display: swap; }
+        @font-face { font-family: 'Bebas Neue'; src: url('fonts/BebasNeue-Regular.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }
+        @font-face { font-family: 'Courier Prime'; src: url('fonts/CourierPrime-Regular.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }
+        @font-face { font-family: 'Courier Prime'; src: url('fonts/CourierPrime-Bold.ttf') format('truetype'); font-style: normal; font-weight: 700 900; font-display: swap; }
+        @font-face { font-family: 'Courier Prime'; src: url('fonts/CourierPrime-Italic.ttf') format('truetype'); font-style: italic; font-weight: 400; font-display: swap; }
+        @font-face { font-family: 'Oswald'; src: url('fonts/Oswald-Variable.ttf') format('truetype'); font-style: normal; font-weight: 200 700; font-display: swap; }
+        @font-face { font-family: 'Share Tech Mono'; src: url('fonts/ShareTechMono-Regular.ttf') format('truetype'); font-style: normal; font-weight: 400; font-display: swap; }
+
+        :root {
+            --bg-color: #0a0a0a;
+            --paper-color: #e3e3e3;
+            --ink-color: #111111;
+            --accent-red: #8b0000;
+            --font-main: 'Courier Prime', monospace;
+            --page-w: 794px; 
+            --page-h: 1123px;
+            --title-font: 'Oswald', sans-serif;
+            --title-align: left;
+            --title-size: 2.8rem;
+            --title-weight: 700;
+            --title-spacing: 0.05em;
+            --title-margin: 2.5rem;
+            --meta-size: 0.9rem;
+            --meta-align: left;
+        }
+
+        body.negative-mode { --paper-color: #000000; --ink-color: #ffffff; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background: var(--bg-color); color: var(--paper-color); font-family: var(--font-main);
+            font-size: 14px; line-height: 1.5; overflow-x: hidden; display: flex; flex-direction: column; height: 100vh;
+        }
+
+        .uppercase { text-transform: uppercase; letter-spacing: 0.05em; }
+        button {
+            background: var(--paper-color); color: var(--ink-color); border: none; padding: 14px 20px;
+            font-family: var(--font-main); font-weight: 900; text-transform: uppercase; cursor: pointer;
+            width: 100%; border-bottom: 4px solid var(--ink-color); margin-top: 10px; font-size: 14px;
+        }
+        button:active { transform: translateY(2px); border-bottom-width: 2px; }
+        button.destructive { background: var(--accent-red); color: white; border-color: #500000; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        input, select, textarea {
+            background: #1a1a1a; border: 1px solid #333; color: var(--paper-color); padding: 12px;
+            font-family: var(--font-main); width: 100%; margin-bottom: 12px; border-radius: 0; font-size: 14px;
+        }
+        input:focus, textarea:focus, select:focus { border-color: var(--paper-color); }
+        input[type="range"] { padding: 0; margin-top: 4px; }
+        label { display: block; margin-bottom: 6px; font-size: 11px; color: #888; font-weight: bold; }
+        .folder-card { border: 1px solid #333; background: #0f0f0f; padding: 12px; margin-bottom: 14px; }
+        .folder-status { color: #bbb; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+        .folder-status.configured::before { content: '● '; color: #00c853; }
+        .folder-status.unconfigured::before { content: '● '; color: #ffb300; }
+        .secondary-btn { background: #252525; color: #e3e3e3; border: 1px solid #444; border-bottom: 3px solid #050505; }
+        .save-message { min-height: 16px; margin-top: 10px; color: #888; font-size: 10px; line-height: 1.4; }
+
+        /* RADIO BUTTON GROUP */
+        .radio-group { display: flex; gap: 0; margin-bottom: 12px; border: 1px solid #333; }
+        .radio-group label {
+            flex: 1; padding: 12px; margin: 0; text-align: center; cursor: pointer;
+            background: #1a1a1a; color: #666; font-size: 12px; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .radio-group input { display: none; }
+        .radio-group input:checked + span { color: var(--paper-color); font-weight: 900; }
+        .radio-group label:has(input:checked) { background: #333; border-color: var(--paper-color); }
+        .radio-group label:first-child { border-right: 1px solid #333; }
+
+        header {
+            padding: 15px 20px; border-bottom: 1px solid #333; display: flex;
+            justify-content: space-between; align-items: center; z-index: 100; background: var(--bg-color);
+        }
+        h1 { font-size: 1.1rem; letter-spacing: 2px; font-weight: 900; }
+
+        main { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+        .panel { border: 1px solid #333; background: #111; margin-bottom: 10px; }
+        .panel-header {
+            padding: 15px; background: #1a1a1a; cursor: pointer; display: flex;
+            justify-content: space-between; align-items: center; border-bottom: 1px solid #333; user-select: none;
+        }
+        .panel-header:hover { background: #222; }
+        .panel-content { padding: 15px; display: none; }
+        .panel.active .panel-content { display: block; }
+        .panel-toggle::after { content: '+'; font-weight: bold; font-size: 16px; }
+        .panel.active .panel-toggle::after { content: '-'; }
+
+        /* MARKDOWN EDITOR */
+        .md-editor-container { display: flex; flex-direction: column; gap: 10px; }
+        .md-toolbar { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; }
+        .md-btn {
+            background: #222; color: #aaa; border: 1px solid #333; padding: 6px 10px;
+            font-size: 12px; cursor: pointer; font-family: var(--font-main); min-width: 32px; text-align: center;
+        }
+        .md-btn:hover { background: #333; color: var(--paper-color); }
+        #inp-body { resize: vertical; min-height: 120px; tab-size: 4; }
+        .md-preview-box {
+            background: #0f0f0f; border: 1px solid #333; padding: 12px; min-height: 80px;
+            font-size: 12px; line-height: 1.6; color: #ccc; max-height: 200px; overflow-y: auto;
+        }
+        .md-preview-box h1, .md-preview-box h2, .md-preview-box h3 { color: var(--paper-color); margin: 8px 0 4px; }
+        .md-preview-box p { margin-bottom: 6px; }
+        .md-preview-box code { background: #222; padding: 2px 5px; font-size: 11px; }
+        .md-preview-box blockquote { border-left: 3px solid var(--accent-red); padding-left: 10px; opacity: 0.8; }
+        .md-preview-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+
+        #preview-wrapper { display: flex; flex-direction: column; align-items: center; gap: 40px; padding-bottom: 100px; width: 100%; }
+
+        .pdf-page {
+            background: var(--paper-color); color: var(--ink-color); width: var(--page-w); height: var(--page-h);
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9); transform-origin: top center; flex-shrink: 0;
+        }
+
+        .page-content {
+            flex: 1; padding: 60px; font-size: 16px; line-height: 1.7; text-align: justify;
+            overflow: hidden; word-wrap: break-word;
+        }
+        .layout-double .page-content { column-count: 2; column-gap: 40px; column-rule: 1px solid var(--ink-color); }
+
+        /* MARKDOWN RENDERED STYLES INSIDE PAGE */
+        .page-content h1 { font-size: 2rem; font-weight: 900; margin: 1.5em 0 0.5em; line-height: 1.2; }
+        .page-content h2 { font-size: 1.6rem; font-weight: 700; margin: 1.3em 0 0.4em; border-bottom: 2px solid var(--ink-color); padding-bottom: 6px; }
+        .page-content h3 { font-size: 1.3rem; font-weight: 700; margin: 1.2em 0 0.3em; }
+        .page-content p { margin-bottom: 1em; }
+        .page-content strong { font-weight: 900; }
+        .page-content em { font-style: italic; }
+        .page-content ul, .page-content ol { margin: 0.8em 0 1em 1.5em; }
+        .page-content li { margin-bottom: 0.3em; }
+        .page-content blockquote {
+            border-left: 4px solid var(--ink-color); padding: 10px 20px; margin: 1.2em 0;
+            background: rgba(0,0,0,0.05); font-style: italic;
+        }
+        body.negative-mode .page-content blockquote { background: rgba(255,255,255,0.05); }
+        .page-content code { background: rgba(0,0,0,0.08); padding: 2px 6px; font-size: 0.9em; }
+        body.negative-mode .page-content code { background: rgba(255,255,255,0.1); }
+        .page-content hr { border: none; border-top: 2px solid var(--ink-color); margin: 2em 0; }
+
+        .doc-title-block { margin-bottom: var(--title-margin); border-bottom: 4px solid var(--ink-color); padding-bottom: 20px; }
+        .doc-title-block.compact-gap { margin-bottom: 1rem !important; padding-bottom: 10px !important; }
+        .doc-title {
+            font-family: var(--title-font); font-size: var(--title-size); font-weight: var(--title-weight);
+            text-transform: uppercase; line-height: 1.1; text-align: var(--title-align); letter-spacing: var(--title-spacing);
+        }
+        .doc-meta {
+            font-family: var(--font-main); font-size: var(--meta-size); text-align: var(--meta-align);
+            margin-top: 8px; opacity: 0.8; letter-spacing: 0.02em;
+        }
+
+        .img-block { width: 100%; margin: 25px 0; break-inside: avoid; }
+        .img-block img { width: 100%; display: block; border: 1px solid var(--ink-color); }
+        .img-caption { font-size: 12px; text-align: center; padding-top: 8px; font-style: italic; opacity: 0.9; letter-spacing: 0.03em; }
+
+        .page-footer {
+            height: 70px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 60px; font-weight: 900; font-size: 13px; background: var(--paper-color); z-index: 20; flex-shrink: 0;
+        }
+
+        .watermark-layer {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;
+            display: flex; align-items: center; justify-content: center; opacity: 0.15;
+            font-size: 9rem; font-weight: 900; transform: rotate(-45deg); text-transform: uppercase;
+            z-index: 10; white-space: nowrap; color: var(--ink-color);
+        }
+
+        @media (max-width: 850px) {
+            .pdf-page { transform: scale(0.38); margin-bottom: -695px; }
+            main { padding: 10px; } h1 { font-size: 0.9rem; }
+        }
+        @media (min-width: 851px) and (max-width: 1200px) {
+            .pdf-page { transform: scale(0.65); margin-bottom: -395px; }
+        }
+        @media (min-width: 1201px) {
+            main { flex-direction: row; align-items: flex-start; }
+            .controls-wrapper { width: 360px; flex-shrink: 0; position: sticky; top: 20px; max-height: calc(100vh - 80px); overflow-y: auto; }
+            #preview-wrapper { flex: 1; margin-left: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 class="uppercase">Project Mayhem // Version 1</h1>
+    <div id="status-indicator" style="width:10px; height:10px; background:#333; border-radius:50%; transition: background 0.3s;"></div>
+</header>
+
+<main>
+    <div class="controls-wrapper">
+        <!-- 1. STRUCTURE & TITLE -->
+        <div class="panel active">
+            <div class="panel-header uppercase" onclick="togglePanel(this)">
+                <span>01 // Structure & Title</span> <span class="panel-toggle"></span>
+            </div>
+            <div class="panel-content">
+                <label class="uppercase">Document Title</label>
+                <input type="text" id="inp-title" value="UNTITLED MANIFESTO" oninput="debouncedRender()">
+                
+                <div style="border:1px solid #333; padding:12px; margin-bottom:12px; background:#0f0f0f;">
+                    <label class="uppercase" style="color:var(--accent-red);">Title Configuration</label>
+                    
+                    <label>Font Family</label>
+                    <select id="title-font" onchange="updateTitleSettings()">
+                        <option value="'Oswald', sans-serif">Oswald (Command)</option>
+                        <option value="'Bebas Neue', sans-serif">Bebas Neue (Bold)</option>
+                        <option value="'Anton', sans-serif">Anton (Impact)</option>
+                        <option value="'Share Tech Mono', monospace">Share Tech Mono (Cyber)</option>
+                        <option value="'Courier Prime', monospace">Courier Prime (Classic)</option>
+                    </select>
+                    
+                    <label>Alignment</label>
+                    <select id="title-align" onchange="updateTitleSettings()">
+                        <option value="left">Left Aligned</option>
+                        <option value="center">Centered</option>
+                        <option value="right">Right Aligned</option>
+                    </select>
+                    
+                    <label>Font Size: <span id="val-title-size">2.8rem</span></label>
+                    <input type="range" id="title-size" min="1.2" max="5" step="0.1" value="2.8" oninput="updateTitleSettings()">
+                    
+                    <label>Weight</label>
+                    <select id="title-weight" onchange="updateTitleSettings()">
+                        <option value="400">Regular</option>
+                        <option value="700" selected>Bold</option>
+                        <option value="900">Black / Heavy</option>
+                    </select>
+                    
+                    <label>Letter Spacing: <span id="val-title-spacing">0.05em</span></label>
+                    <input type="range" id="title-spacing" min="0" max="0.3" step="0.01" value="0.05" oninput="updateTitleSettings()">
+                    
+                    <label>Bottom Margin: <span id="val-title-margin">2.5rem</span></label>
+                    <input type="range" id="title-margin" min="0.5" max="6" step="0.1" value="2.5" oninput="updateTitleSettings()">
+                    
+                    <hr style="border:0; border-top:1px solid #333; margin:12px 0;">
+                    
+                    <label>Metadata Line (Date / Creator)</label>
+                    <input type="text" id="inp-meta" placeholder="2026-08-09 // JOHNBLAK" oninput="debouncedRender()">
+                    
+                    <label>Meta Alignment</label>
+                    <select id="meta-align" onchange="updateTitleSettings()">
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                    </select>
+                    
+                    <label>Meta Size: <span id="val-meta-size">0.9rem</span></label>
+                    <input type="range" id="meta-size" min="0.6" max="1.5" step="0.05" value="0.9" oninput="updateTitleSettings()">
+                </div>
+                
+                <label class="uppercase">Layout Flow</label>
+                <select id="inp-layout" onchange="debouncedRender()">
+                    <option value="single">Straight Flow (Single)</option>
+                    <option value="double">Double Paragraph (Split)</option>
+                </select>
+
+                <label class="uppercase">Footer Text</label>
+                <input type="text" id="inp-footer" value="CONFIDENTIAL // DO NOT DISTRIBUTE" oninput="debouncedRender()">
+            </div>
+        </div>
+
+        <!-- 2. CONTENT (MARKDOWN) -->
+        <div class="panel">
+            <div class="panel-header uppercase" onclick="togglePanel(this)">
+                <span>02 // Content (Markdown)</span> <span class="panel-toggle"></span>
+            </div>
+            <div class="panel-content">
+                <div class="md-editor-container">
+                    <div class="md-toolbar">
+                        <button type="button" class="md-btn" onclick="mdInsert('**','**')" title="Bold"><b>B</b></button>
+                        <button type="button" class="md-btn" onclick="mdInsert('*','*')" title="Italic"><i>I</i></button>
+                        <button type="button" class="md-btn" onclick="mdInsert('# ','')" title="H1">H1</button>
+                        <button type="button" class="md-btn" onclick="mdInsert('## ','')" title="H2">H2</button>
+                        <button type="button" class="md-btn" onclick="mdInsert('### ','')" title="H3">H3</button>
+                        <button type="button" class="md-btn" onclick="mdInsert('> ','')" title="Quote">&gt;</button>
+                        <button type="button" class="md-btn" onclick="mdInsert('- ','')" title="List">&#8226;</button>
+                        <button type="button" class="md-btn" onclick="mdInsert('`','`')" title="Code">&lt;&gt;</button>
+                        <button type="button" class="md-btn" onclick="mdInsert('---\n','')" title="Divider">&mdash;</button>
+                    </div>
+                    <textarea id="inp-body" rows="10" oninput="onMarkdownInput()" placeholder="Write in Markdown..."># Introduction
+
+The first rule of this document is: **You do not talk about this document.**
+
+## Core Principles
+
+Consistency is the bedrock of sanity. We reject the chaotic nature of unformatted text.
+
+> Every pixel must serve a purpose. Every paragraph must bleed authority.
+
+- Order over chaos
+- Precision over decoration  
+- Function over form
+
+This editor enforces *discipline*. Use it wisely.</textarea>
+                    <div class="md-preview-label">Live Markdown Preview</div>
+                    <div class="md-preview-box" id="md-live-preview"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. VISUALS -->
+        <div class="panel">
+            <div class="panel-header uppercase" onclick="togglePanel(this)">
+                <span>03 // Visuals</span> <span class="panel-toggle"></span>
+            </div>
+            <div class="panel-content">
+                <label class="uppercase">Upload Color Image</label>
+                <input type="file" id="inp-image" accept="image/*" onchange="handleImageUpload(event)">
+                
+                <label class="uppercase">Image Caption (Optional)</label>
+                <input type="text" id="inp-caption" placeholder="FIG. 01 // EVIDENCE" oninput="debouncedRender()">
+                
+                <label class="uppercase">Image Placement</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="img-pos" value="first" checked onchange="debouncedRender()">
+                        <span>FIRST PAGE</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="img-pos" value="last" onchange="debouncedRender()">
+                        <span>LAST PAGE</span>
+                    </label>
+                </div>
+                
+                <label class="uppercase">Watermark Text</label>
+                <input type="text" id="inp-watermark" value="TOP SECRET" oninput="debouncedRender()">
+            </div>
+        </div>
+
+        <!-- 4. SECURITY & EXPORT -->
+        <div class="panel">
+            <div class="panel-header uppercase" onclick="togglePanel(this)">
+                <span>04 // Security & Export</span> <span class="panel-toggle"></span>
+            </div>
+            <div class="panel-content">
+                <div class="folder-card">
+                    <label class="uppercase">PDF Output Folder // One-Time Setup</label>
+                    <div id="folder-status" class="folder-status unconfigured">Waiting for folder selection…</div>
+                    <button type="button" class="secondary-btn" onclick="chooseOutputFolder()">CHOOSE / CHANGE OUTPUT FOLDER</button>
+                    <div id="save-message" class="save-message">PDF files are saved directly to this folder.</div>
+                </div>
+
+                <label class="uppercase">Encryption Password</label>
+                <input type="password" id="inp-password" placeholder="Leave empty for none">
+                
+                <label class="uppercase" style="margin-top:12px;">Output Polarity</label>
+                <button type="button" id="btn-invert" onclick="toggleNegativeMode()" style="background:#333; color:#e3e3e3; border-bottom-color:#111;">ENABLE NEGATIVE OUTPUT</button>
+                
+                <button type="button" class="destructive" id="btn-generate" onclick="generatePDF()" style="margin-top:15px;">SAVE BORDERLESS PDF</button>
+                <p style="font-size:10px; margin-top:12px; color:#555; line-height:1.4;">⚠ OFFLINE PDF ENGINE. IMAGES IN COLOR. ZERO-MARGIN OUTPUT. OPTIONAL ENCRYPTION. SAVED TO YOUR SELECTED FOLDER.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="preview-wrapper"></div>
+</main>
+
+<script>
+    const PAGE_WIDTH = 794;   
+    const PAGE_HEIGHT = 1123; 
+    const CONTENT_PADDING = 60;
+    const FOOTER_HEIGHT = 70;
+    const SAFE_CONTENT_HEIGHT = PAGE_HEIGHT - (CONTENT_PADDING * 2) - FOOTER_HEIGHT - 40; 
+
+    let renderTimeout;
+    let currentImageData = null;
+    let isNegativeMode = false;
+    let nativeSaveInProgress = false;
+
+    // Markdown and all user-entered metadata are sanitized before entering the DOM.
+    marked.setOptions({ breaks: true, gfm: true });
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>'"]/g, char => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        })[char]);
+    }
+
+    function safeMarkdown(raw) {
+        return DOMPurify.sanitize(marked.parse(raw), {
+            USE_PROFILES: { html: true },
+            FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
+            FORBID_ATTR: ['style', 'srcset'],
+            ALLOW_UNKNOWN_PROTOCOLS: false
+        });
+    }
+
+    function chooseOutputFolder() {
+        if (window.ProjectMayhem && typeof ProjectMayhem.chooseOutputFolder === 'function') {
+            ProjectMayhem.chooseOutputFolder();
+        } else {
+            alert('Folder selection is available in the Android app.');
+        }
+    }
+
+    window.onNativeFolderChanged = function(label, configured) {
+        const status = document.getElementById('folder-status');
+        if (!status) return;
+        status.textContent = configured ? `READY // ${label}` : 'NO OUTPUT FOLDER SELECTED';
+        status.classList.toggle('configured', configured);
+        status.classList.toggle('unconfigured', !configured);
+    };
+
+    window.onNativePdfSaved = function(success, message) {
+        nativeSaveInProgress = false;
+        const status = document.getElementById('status-indicator');
+        const btn = document.getElementById('btn-generate');
+        const saveMessage = document.getElementById('save-message');
+        status.style.background = success ? '#0f0' : '#f00';
+        btn.innerText = 'SAVE BORDERLESS PDF';
+        btn.disabled = false;
+        if (saveMessage) {
+            saveMessage.textContent = message;
+            saveMessage.style.color = success ? '#00c853' : '#ff5252';
+        }
+    };
+
+    function arrayBufferToBase64(buffer) {
+        const bytes = new Uint8Array(buffer);
+        const chunkSize = 0x8000;
+        const chunks = [];
+        for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+            chunks.push(String.fromCharCode.apply(
+                null, bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length))));
+        }
+        return btoa(chunks.join(''));
+    }
+
+    function togglePanel(header) { header.parentElement.classList.toggle('active'); }
+
+    function debouncedRender() {
+        clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(paginateAndRender, 200);
+    }
+
+    function onMarkdownInput() {
+        const raw = document.getElementById('inp-body').value;
+        document.getElementById('md-live-preview').innerHTML = safeMarkdown(raw);
+        debouncedRender();
+    }
+
+    function mdInsert(before, after) {
+        const ta = document.getElementById('inp-body');
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const selected = ta.value.substring(start, end);
+        const replacement = before + (selected || 'text') + after;
+        ta.value = ta.value.substring(0, start) + replacement + ta.value.substring(end);
+        ta.focus();
+        ta.selectionStart = start + before.length;
+        ta.selectionEnd = start + before.length + (selected || 'text').length;
+        onMarkdownInput();
+    }
+
+    function updateTitleSettings() {
+        const root = document.documentElement;
+        root.style.setProperty('--title-font', document.getElementById('title-font').value);
+        root.style.setProperty('--title-align', document.getElementById('title-align').value);
+        root.style.setProperty('--title-size', `${document.getElementById('title-size').value}rem`);
+        root.style.setProperty('--title-weight', document.getElementById('title-weight').value);
+        root.style.setProperty('--title-spacing', `${document.getElementById('title-spacing').value}em`);
+        root.style.setProperty('--title-margin', `${document.getElementById('title-margin').value}rem`);
+        root.style.setProperty('--meta-align', document.getElementById('meta-align').value);
+        root.style.setProperty('--meta-size', `${document.getElementById('meta-size').value}rem`);
+
+        document.getElementById('val-title-size').textContent = `${document.getElementById('title-size').value}rem`;
+        document.getElementById('val-title-spacing').textContent = `${document.getElementById('title-spacing').value}em`;
+        document.getElementById('val-title-margin').textContent = `${document.getElementById('title-margin').value}rem`;
+        document.getElementById('val-meta-size').textContent = `${document.getElementById('meta-size').value}rem`;
+        debouncedRender();
+    }
+
+    function handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => { currentImageData = ev.target.result; debouncedRender(); };
+        reader.readAsDataURL(file);
+    }
+
+    function toggleNegativeMode() {
+        isNegativeMode = !isNegativeMode;
+        const btn = document.getElementById('btn-invert');
+        document.body.classList.toggle('negative-mode', isNegativeMode);
+        if (isNegativeMode) {
+            btn.innerText = "DISABLE NEGATIVE OUTPUT";
+            btn.style.background = "#e3e3e3"; btn.style.color = "#111"; btn.style.borderBottomColor = "#000";
+        } else {
+            btn.innerText = "ENABLE NEGATIVE OUTPUT";
+            btn.style.background = "#333"; btn.style.color = "#e3e3e3"; btn.style.borderBottomColor = "#111";
+        }
+        debouncedRender();
+    }
+
+    async function paginateAndRender() {
+        const wrapper = document.getElementById('preview-wrapper');
+        wrapper.innerHTML = ''; 
+
+        const title = escapeHtml(document.getElementById('inp-title').value || "UNTITLED");
+        const meta = escapeHtml(document.getElementById('inp-meta').value);
+        const footerText = escapeHtml(document.getElementById('inp-footer').value);
+        const watermark = escapeHtml(document.getElementById('inp-watermark').value);
+        const layout = document.getElementById('inp-layout').value;
+        const rawMarkdown = document.getElementById('inp-body').value;
+        const caption = escapeHtml(document.getElementById('inp-caption').value);
+        const imgPosition = document.querySelector('input[name="img-pos"]:checked').value;
+
+        // Parse markdown to HTML
+        const parsedHTML = safeMarkdown(rawMarkdown);
+        
+        // Split into block-level elements for atomic pagination
+        const tempParser = document.createElement('div');
+        tempParser.innerHTML = parsedHTML;
+        const blocks = Array.from(tempParser.children).map(el => ({
+            type: 'md-block',
+            html: el.outerHTML
+        }));
+
+        // Build image block
+        let imageBlock = null;
+        if (currentImageData) {
+            const capHTML = caption ? `<div class="img-caption">${caption}</div>` : '';
+            imageBlock = {
+                type: 'image',
+                html: `<div class="img-block"><img src="${currentImageData}" alt="Document Image">${capHTML}</div>`
+            };
+        }
+
+        // Arrange blocks based on image position
+        let orderedBlocks = [];
+        if (imgPosition === 'first' && imageBlock) {
+            orderedBlocks.push(imageBlock);
+            orderedBlocks.push(...blocks);
+        } else if (imgPosition === 'last' && imageBlock) {
+            orderedBlocks.push(...blocks);
+            orderedBlocks.push(imageBlock);
+        } else {
+            orderedBlocks = blocks;
+        }
+
+        // Paginate
+        let currentPageHTML = '';
+        let pages = [];
+        
+        const measureDiv = document.createElement('div');
+        measureDiv.style.cssText = `
+            position:absolute; visibility:hidden; pointer-events:none;
+            width:${PAGE_WIDTH - (CONTENT_PADDING * 2)}px;
+            font-family:'Courier Prime',monospace; font-size:16px; line-height:1.7;
+            text-align:justify; word-wrap:break-word;
+        `;
+        if (layout === 'double') {
+            measureDiv.style.columnCount = '2';
+            measureDiv.style.columnGap = '40px';
+        }
+        document.body.appendChild(measureDiv);
+
+        for (let i = 0; i < orderedBlocks.length; i++) {
+            const block = orderedBlocks[i];
+            let testContent = currentPageHTML + block.html;
+            measureDiv.innerHTML = testContent;
+
+            if (measureDiv.scrollHeight > SAFE_CONTENT_HEIGHT && currentPageHTML !== '') {
+                pages.push(currentPageHTML);
+                currentPageHTML = block.html;
+            } else {
+                currentPageHTML = testContent;
+            }
+        }
+        
+        if (currentPageHTML.trim()) pages.push(currentPageHTML);
+        document.body.removeChild(measureDiv);
+        if (pages.length === 0) pages = ['<p></p>'];
+
+        // Check if page 1 contains image for compact title gap
+        const page1HasImage = pages[0] && pages[0].includes('img-block');
+
+        pages.forEach((content, index) => {
+            const pageNum = index + 1;
+            const isFirst = index === 0;
+            const pageEl = document.createElement('div');
+            pageEl.className = `pdf-page ${layout === 'double' ? 'layout-double' : ''}`;
+            
+            const titleGapClass = (isFirst && page1HasImage) ? 'compact-gap' : '';
+            const metaHTML = meta ? `<div class="doc-meta">${meta}</div>` : '';
+            
+            pageEl.innerHTML = `
+                <div class="watermark-layer">${watermark}</div>
+                <div class="page-content">
+                    ${isFirst ? `<div class="doc-title-block ${titleGapClass}"><div class="doc-title">${title}</div>${metaHTML}</div>` : ''}
+                    ${content}
+                </div>
+                <div class="page-footer">
+                    <span>${footerText}</span>
+                    <span>PAGE ${String(pageNum).padStart(2, '0')}</span>
+                </div>
+            `;
+            wrapper.appendChild(pageEl);
+        });
+    }
+
+    async function generatePDF() {
+        if (nativeSaveInProgress) return;
+
+        const status = document.getElementById('status-indicator');
+        const btn = document.getElementById('btn-generate');
+        const saveMessage = document.getElementById('save-message');
+        const password = document.getElementById('inp-password').value;
+        let handedToNative = false;
+
+        status.style.background = '#ff0';
+        btn.innerText = 'RENDERING PAGES…';
+        btn.disabled = true;
+        if (saveMessage) {
+            saveMessage.textContent = 'Rendering locally on this device…';
+            saveMessage.style.color = '#ffeb3b';
+        }
+
+        try {
+            await paginateAndRender();
+            if (document.fonts && document.fonts.ready) await document.fonts.ready;
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+            const pages = document.querySelectorAll('.pdf-page');
+            if (!pages.length) throw new Error('No pages were available to export.');
+            const { jsPDF } = window.jspdf;
+            const docConfig = { orientation: 'p', unit: 'mm', format: 'a4', compress: true };
+            if (password.length > 0) {
+                docConfig.encryption = {
+                    userPassword: password,
+                    ownerPassword: password,
+                    userPermissions: ['print', 'modify', 'copy', 'annot-forms']
+                };
+            }
+
+            const doc = new jsPDF(docConfig);
+            const pdfW = doc.internal.pageSize.getWidth();
+            const pdfH = doc.internal.pageSize.getHeight();
+            const bgColor = isNegativeMode ? '#000000' : '#e3e3e3';
+
+            for (let i = 0; i < pages.length; i++) {
+                btn.innerText = `RENDERING ${i + 1} / ${pages.length}…`;
+                const page = pages[i];
+                const origT = page.style.transform;
+                const origM = page.style.marginBottom;
+                page.style.transform = 'none';
+                page.style.marginBottom = '0';
+
+                let canvas;
+                try {
+                    canvas = await html2canvas(page, {
+                        scale: 2,
+                        useCORS: false,
+                        allowTaint: false,
+                        logging: false,
+                        width: PAGE_WIDTH,
+                        height: PAGE_HEIGHT,
+                        windowWidth: PAGE_WIDTH,
+                        windowHeight: PAGE_HEIGHT,
+                        scrollX: 0,
+                        scrollY: 0,
+                        backgroundColor: bgColor,
+                        onclone: clonedDoc => {
+                            const clonedPage = clonedDoc.querySelector(
+                                `.pdf-page:nth-child(${i + 1})`);
+                            if (clonedPage) {
+                                clonedPage.style.transform = 'none';
+                                clonedPage.style.marginBottom = '0';
+                            }
+                        }
+                    });
+                } finally {
+                    page.style.transform = origT;
+                    page.style.marginBottom = origM;
+                }
+
+                if (i > 0) doc.addPage();
+                const imageData = canvas.toDataURL('image/jpeg', 0.94);
+                doc.addImage(imageData, 'JPEG', 0, 0, pdfW, pdfH, undefined, 'FAST');
+                canvas.width = 1;
+                canvas.height = 1;
+            }
+
+            const rawTitle = document.getElementById('inp-title').value || 'UNTITLED';
+            const titleSlug = rawTitle.toUpperCase()
+                .replace(/[^A-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 42)
+                || 'UNTITLED';
+            const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, 'Z');
+            const filename = `PROJECT_MAYHEM_${titleSlug}_${stamp}.pdf`;
+
+            if (window.ProjectMayhem && typeof ProjectMayhem.savePdf === 'function') {
+                nativeSaveInProgress = true;
+                handedToNative = true;
+                btn.innerText = 'SAVING TO SELECTED FOLDER…';
+                const base64 = arrayBufferToBase64(doc.output('arraybuffer'));
+                ProjectMayhem.savePdf(base64, filename);
+            } else {
+                doc.save(filename);
+                status.style.background = '#0f0';
+                if (saveMessage) saveMessage.textContent = `Downloaded ${filename}`;
+            }
+        } catch (error) {
+            console.error('PDF Generation Error:', error);
+            status.style.background = '#f00';
+            if (saveMessage) {
+                saveMessage.textContent = `Generation failed: ${error.message || 'Unknown error'}`;
+                saveMessage.style.color = '#ff5252';
+            }
+            alert(`GENERATION FAILED: ${error.message || 'Unknown error.'}`);
+        } finally {
+            if (!handedToNative) {
+                nativeSaveInProgress = false;
+                btn.innerText = 'SAVE BORDERLESS PDF';
+                btn.disabled = false;
+            }
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        updateTitleSettings();
+        onMarkdownInput();
+        document.getElementById('status-indicator').style.background = '#0f0';
+        if (window.ProjectMayhem && typeof ProjectMayhem.onAppReady === 'function') ProjectMayhem.onAppReady();
+    });
+</script>
+
+</body>
+</html>

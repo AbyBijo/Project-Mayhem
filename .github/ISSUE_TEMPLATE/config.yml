@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: User guide
+    url: https://github.com/AbyBijo/Project-Mayhem/blob/main/docs/Project-Mayhem-User-Guide.pdf
+    about: Read the illustrated installation and usage guide before opening an issue.
+  - name: Security report
+    url: https://github.com/AbyBijo/Project-Mayhem/security/policy
+    about: Read the private security-reporting instructions instead of opening a public issue.

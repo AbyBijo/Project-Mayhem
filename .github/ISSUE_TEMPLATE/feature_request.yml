@@ -1,0 +1,53 @@
+name: Feature request
+description: Suggest a focused improvement for Project Mayhem.
+title: "[Feature]: "
+labels: [enhancement, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Explain the user problem first, then describe the smallest useful solution.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is difficult or impossible today?
+      placeholder: I want to... because...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the expected workflow and result.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds have you tried?
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Importance
+      options:
+        - Nice to have
+        - Useful for many documents
+        - Blocks an important workflow
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Project principles
+      options:
+        - label: This feature can work without requiring an online account.
+        - label: This feature can preserve the app's privacy-first storage model.
+        - label: I searched existing issues for a similar request.
+          required: true
