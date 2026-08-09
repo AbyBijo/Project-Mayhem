@@ -43,7 +43,7 @@ jobs:
         run: ./gradlew lintDebug assembleDebug --stacktrace
 
       - name: Upload debug APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: project-mayhem-debug-${{ github.sha }}
           path: app/build/outputs/apk/debug/app-debug.apk
@@ -52,7 +52,7 @@ jobs:
 
       - name: Upload lint report on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lint-report-${{ github.sha }}
           path: app/build/reports/lint-results-debug.html
