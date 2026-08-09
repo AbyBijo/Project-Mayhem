@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/images/project-mayhem-icon.png" alt="Project Mayhem icon" width="180">
+  <img src="project-mayhem-icon.png" alt="Project Mayhem icon" width="180">
 
 # PROJECT MAYHEM
 
@@ -10,7 +10,7 @@
 ![Offline](https://img.shields.io/badge/PDF_ENGINE-OFFLINE-111111?style=for-the-badge)
 ![Storage](https://img.shields.io/badge/STORAGE-SAF-555555?style=for-the-badge)
 
-[User guide (PDF)](docs/Project-Mayhem-User-Guide.pdf) · [Report an issue](https://github.com/AbyBijo)
+[User guide (PDF)](Project-Mayhem-User-Guide.pdf) · [Report an issue](https://github.com/AbyBijo)
 
 </div>
 
