@@ -14,7 +14,7 @@ Thank you for helping improve Project Mayhem.
 Requirements:
 
 - JDK 17
-- Android SDK Platform 35
+- Android SDK Platform 36 and Build-Tools 36.0.0
 - Git
 
 Build and validate:

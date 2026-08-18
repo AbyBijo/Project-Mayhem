@@ -294,14 +294,13 @@ Project Mayhem does not store or recover encryption passwords. Generate another 
 
 ## Building from Source
 
-> [!TIP]
-> Repository maintainers can follow the complete [GitHub launch walkthrough](GITHUB-SETUP-WALKTHROUGH.md) for About settings, topics, social preview, CI, branch protection, and publishing the Version 1 release.
+Maintainers can follow [CONTRIBUTING.md](CONTRIBUTING.md) for the local lint and debug-build workflow. Release tagging and APK publishing are documented in [Publishing a GitHub Release](#publishing-a-github-release).
 
 ### Prerequisites
 
 - JDK 17
 - Android Studio or a command-line Android SDK installation
-- Android SDK Platform 35
+- Android SDK Platform 36 and Build-Tools 36.0.0
 - Git
 
 ### Clone and build
