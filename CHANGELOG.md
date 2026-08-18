@@ -2,6 +2,13 @@
 
 All notable changes to Project Mayhem are documented here.
 
+## Unreleased
+
+### Fixed
+
+- Android CI after the AndroidX Activity 1.13.0 and Android Gradle Plugin 9.3.1 upgrades by compiling and targeting API 36
+- Broken README link to the deleted GitHub launch walkthrough
+
 ## Version 1 — 2026-08-09
 
 ### Added
